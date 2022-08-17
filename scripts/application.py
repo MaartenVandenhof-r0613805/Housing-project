@@ -10,6 +10,8 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import plotly.express
 
+
+
 #########################
 ####### FUNCTIONS #######
 #########################
@@ -26,6 +28,27 @@ def get_data():
 
 # Set wide layout
 st.set_page_config(layout="wide", page_title="Unassigned Classes")
+st.title("CAW oost brabant scraper")
+
+#########################
+####### Scrapers #######
+#########################
+st.subheader("Scrape settings")
+options = st.multiselect(
+     'what sites do you want to check?',
+     ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21'])
+
+st.write('You selected:', options)
+
+title = st.text_input('On what city do you want to focus?', 'City name')
+st.write('The current chosen city is', title)
+
+if(st.button('Scrape')):
+    pass
+
+
+
+
 
 # Get data
 data = get_data()
@@ -36,7 +59,8 @@ cols = st.columns([4, 1, 1, 1, 1])
 # Selection screen
 with cols[0]:
     # Title
-    st.title("Selecteer rij voor meer info")
+    st.subheader("Gevonden items")
+    st.text("Selecteer rij voor meer info")
     selection_df = data[["Id", "site", "itemtype","rent", "monthly_fee", "bedrooms"]]
     # Create Ag Grid options
     gb = GridOptionsBuilder.from_dataframe(selection_df)
@@ -81,3 +105,5 @@ for i in range(len(selected_data.columns)):
     print()
     cols[i% 4 + 1].write("#### " + col)
     cols[i% 4 + 1].write(selected_data[col].iloc[0])
+
+
