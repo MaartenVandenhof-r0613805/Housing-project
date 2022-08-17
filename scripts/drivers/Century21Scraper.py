@@ -71,6 +71,7 @@ def fetchLinks(driver,detail,contracttype):
 
 
 def checkLink(driver,URL):
+    driver = setDriver(driver)
     driver.implicitly_wait(0.4)
     
     halted = False

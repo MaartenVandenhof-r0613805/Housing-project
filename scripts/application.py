@@ -41,29 +41,63 @@ st.image(image)
 
 st.subheader("Scrape settings")
 
-Scrapers = ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21']
-options = st.multiselect(
-     'what sites do you want to check?', Scrapers)
-st.write('You selected:', options)
+# Select sites to scrape
+Sites = ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21']
+SiteOptions = st.multiselect(
+     'what sites do you want to check?', Sites)
+st.write('You selected:', SiteOptions)
 
+# Select driver for scraping
+drivers = ['\chromedriver']
+driverChoice = st.selectbox(
+     'What internet driver should be used?', drivers)
+st.write('You selected:', driverChoice)
+
+# Give further constraintson the scrape focus
 title = st.text_input('On what city do you want to focus?', 'City name')
 st.write('The current chosen city is', title)
 
+# Scrape function
 buttonPress = st.button('Scrape')
 
 status = 'Idle'
 status_message = st.empty()
+
 if(buttonPress):
     status = 'Processing'
-    status_message.markdown('Loading')
-    for scraper in options:
+
+    for scraper in SiteOptions:
+        status_message.markdown('Loading')
         if (scraper == 'Century21'): 
             import drivers.Century21Scraper as ScraperObject
         if (scraper == 'ImmoM'): 
             import drivers.ImmomScraper as ScraperObject
-        links = ScraperObject.fetchLinks('\chromedriver','3000','FOR_RENT')
+        
+        try:
+            driver = ScraperObject.setDriver(driverChoice)
+        except:
+            status_message.markdown('Driver error')
+            continue
+
+        try:
+            links = ScraperObject.fetchLinks(driver,'3000','FOR_RENT')
+        except:
+            status_message.markdown('Link gathering error')
+            
+        progress_bar = st.progress(0)
+        progress = 0
+        for link in links:
+            try:
+                ScraperObject.checkLink('\chromedriver',link)
+            except:
+                status_message.markdown('Data gathering error')
+
+            progress = progress + (1/len(links))
+            progress_bar.progress(progress)
+
 
     status = 'Done'
+    progress_bar.progress(100)
     status_message.markdown('done')
 else:
     status = 'Idle'
