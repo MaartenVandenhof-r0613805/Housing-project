@@ -31,7 +31,7 @@ st.set_page_config(layout="wide", page_title="Unassigned Classes")
 data = get_data()
 
 # Set colums
-cols = st.columns([4, 1, 1, 1, 1])
+cols = st.columns([3, 1, 1])
 
 # Selection screen
 with cols[0]:
@@ -62,9 +62,9 @@ with cols[0]:
     st.map()
 
     try:
-        selected_data = data[data.Id == selected_row.iloc[0].Id]
+        selected_data = data[data.Id == selected_row.iloc[0].Id].iloc[0]
     except:
-        selected_data = data.iloc[:1]
+        selected_data = data.iloc[0]
 
 # Information screen
 with cols[1]:
@@ -76,8 +76,13 @@ for col in cols[2:]:
     col.markdown('##')
 
 
-for i in range(len(selected_data.columns)):
-    col = selected_data.columns[i]
-    print()
-    cols[i% 4 + 1].write("#### " + col)
-    cols[i% 4 + 1].write(selected_data[col].iloc[0])
+with cols[1]:
+    st.write("### Prijs: ")
+    st.write(str(selected_data["rent"]) + " " + str(selected_data["monthly_fee"]))
+
+    st.write("### Adres")
+    st.write(selected_data["postalcode"]  + " " +  selected_data["city"])
+    st.write(selected_data["street"]  + " " +  selected_data["house_number"])
+
+    st.write("### Website")
+    st.write(selected_data["site"]  + ": " +  selected_data["link"])
