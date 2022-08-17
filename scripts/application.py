@@ -28,32 +28,32 @@ def get_data():
 
 # Set wide layout
 st.set_page_config(layout="wide", page_title="Unassigned Classes")
-st.title("CAW oost brabant scraper")
+
+# Set header
+header_cols = st.columns([2, 2,1])
+header_cols[0].title("CAW oost brabant scraper")
 
 from PIL import Image
-image = Image.open('assets\CAW.png')
+image = Image.open('./assets/CAW.png')
 
-st.image(image)
+header_cols[2].image(image, width=150)
 
 
-#########################
-####### Scrapers #######
-#########################
-st.subheader("Scrape settings")
+# Scraper settings
+st.subheader("Scraper opties")
+st.write('##### Selecteer een website:')
 options = st.multiselect(
-     'what sites do you want to check?',
+     '',
      ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21'])
 
-st.write('You selected:', options)
-
-title = st.text_input('On what city do you want to focus?', 'City name')
-st.write('The current chosen city is', title)
+st.write('##### Geselecteerd opties:')
+st.write(", ".join(options))
+st.write('##### Selecteer een stad:')
+title = st.text_input('', 'Leuven')
+st.write('De gekozen stad is: ', title)
 
 if(st.button('Scrape')):
     pass
-
-
-
 
 
 # Get data
@@ -65,8 +65,8 @@ cols = st.columns([3, 1, 1])
 # Selection screen
 with cols[0]:
     # Title
-    st.subheader("Gevonden items")
-    st.text("Selecteer rij voor meer info")
+    st.write("## Gevonden items")
+    st.write("Selecteer rij voor meer info")
     selection_df = data[["Id", "site", "itemtype","rent", "monthly_fee", "bedrooms"]]
     # Create Ag Grid options
     gb = GridOptionsBuilder.from_dataframe(selection_df)
@@ -89,7 +89,7 @@ with cols[0]:
     selected_row = pd.DataFrame(selected_row)
     
     # Show map
-    st.map()
+    # st.map()
 
     try:
         selected_data = data[data.Id == selected_row.iloc[0].Id].iloc[0]
@@ -108,7 +108,7 @@ for col in cols[2:]:
 
 with cols[1]:
     st.write("### Prijs: ")
-    st.write(str(selected_data["rent"]) + " " + str(selected_data["monthly_fee"]))
+    st.write(str(selected_data["rent"]) + " + " + str(selected_data["monthly_fee"]))
 
     st.write("### Adres")
     st.write(selected_data["postalcode"]  + " " +  selected_data["city"])
@@ -116,3 +116,16 @@ with cols[1]:
 
     st.write("### Website")
     st.write(selected_data["site"]  + ": " +  selected_data["link"])
+
+
+with cols[2]:
+    st.write("### Type gebouw")
+    st.write(selected_data["itemtype"] )
+
+    st.write("### Kamers: ")
+    st.write("Slaapkamers: " + str(selected_data["bedrooms"])) 
+    st.write("Badkamers: " + selected_data["bathrooms"])
+
+
+    st.write("### EPC score")
+    st.write(selected_data["epc_class"] )
