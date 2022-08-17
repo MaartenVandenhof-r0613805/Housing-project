@@ -10,7 +10,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import plotly.express
 
-
+from PIL import Image
 
 #########################
 ####### FUNCTIONS #######
@@ -30,7 +30,6 @@ def get_data():
 st.set_page_config(layout="wide", page_title="Unassigned Classes")
 st.title("CAW oost brabant scraper")
 
-from PIL import Image
 image = Image.open('assets\CAW.png')
 
 st.image(image)
@@ -39,80 +38,90 @@ st.image(image)
 #########################
 ####### Scrapers #######
 #########################
-st.subheader("Scrape settings")
-options = st.multiselect(
-     'what sites do you want to check?',
-     ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21'])
 
+st.subheader("Scrape settings")
+
+Scrapers = ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21']
+options = st.multiselect(
+     'what sites do you want to check?', Scrapers)
 st.write('You selected:', options)
 
 title = st.text_input('On what city do you want to focus?', 'City name')
 st.write('The current chosen city is', title)
 
-if(st.button('Scrape')):
-    pass
+buttonPress = st.button('Scrape')
+
+status = 'Idle'
+status_message = st.empty()
+if(buttonPress):
+    status = 'Processing'
+    status_message.markdown('Loading')
+    for scraper in options:
+        if (scraper == 'Century21'): 
+            import drivers.Century21Scraper as ScraperObject
+        if (scraper == 'ImmoM'): 
+            import drivers.ImmomScraper as ScraperObject
+        links = ScraperObject.fetchLinks('\chromedriver','3000','FOR_RENT')
+
+    status = 'Done'
+    status_message.markdown('done')
+else:
+    status = 'Idle'
+    status_message.markdown(' ')
+
+if (status == 'Done'):
+    data = get_data()
+
+    # Set colums
+    cols = st.columns([4, 1, 1, 1, 1])
+
+    # Selection screen
+    with cols[0]:
+        # Title
+        st.subheader("Gevonden items")
+        st.text("Selecteer rij voor meer info")
+        selection_df = data[["Id", "site", "itemtype","rent", "monthly_fee", "bedrooms"]]
+        # Create Ag Grid options
+        gb = GridOptionsBuilder.from_dataframe(selection_df)
+        gb.configure_pagination()
+        gb.configure_side_bar()
+        gb.configure_selection(selection_mode="single", use_checkbox=True)
+        gb.configure_default_column(groupable=True, value=True, enableRowGroup=True)
+        gridOptions = gb.build()
+
+        selcted_class = AgGrid(
+                selection_df, 
+                gridOptions=gridOptions,
+                fit_columns_on_grid_load=True,
+                theme="dark",
+                height = "300px",
+                update_mode=GridUpdateMode.SELECTION_CHANGED)
+            
+        # Selected data
+        selected_row = selcted_class["selected_rows"]
+        selected_row = pd.DataFrame(selected_row)
+
+        # Show map
+        st.map()
+
+        try:
+            selected_data = data[data.Id == selected_row.iloc[0].Id]
+        except:
+            selected_data = data.iloc[:1]
+
+    # Information screen
+    with cols[1]:
+        # Title
+        st.markdown("## Informatie")
+
+    for col in cols[2:]:
+        col.markdown('##')
+        col.markdown('##')
 
 
+    for i in range(len(selected_data.columns)):
+        col = selected_data.columns[i]
+        print()
+        cols[i% 4 + 1].write("#### " + col)
+        cols[i% 4 + 1].write(selected_data[col].iloc[0])
 
-
-
-# Get data
-data = get_data()
-
-# Set colums
-cols = st.columns([3, 1, 1])
-
-# Selection screen
-with cols[0]:
-    # Title
-    st.subheader("Gevonden items")
-    st.text("Selecteer rij voor meer info")
-    selection_df = data[["Id", "site", "itemtype","rent", "monthly_fee", "bedrooms"]]
-    # Create Ag Grid options
-    gb = GridOptionsBuilder.from_dataframe(selection_df)
-    gb.configure_pagination()
-    gb.configure_side_bar()
-    gb.configure_selection(selection_mode="single", use_checkbox=True)
-    gb.configure_default_column(groupable=True, value=True, enableRowGroup=True)
-    gridOptions = gb.build()
-
-    selcted_class = AgGrid(
-            selection_df, 
-            gridOptions=gridOptions,
-            fit_columns_on_grid_load=True,
-            theme="dark",
-            height = "300px",
-            update_mode=GridUpdateMode.SELECTION_CHANGED)
-        
-    # Selected data
-    selected_row = selcted_class["selected_rows"]
-    selected_row = pd.DataFrame(selected_row)
-    
-    # Show map
-    st.map()
-
-    try:
-        selected_data = data[data.Id == selected_row.iloc[0].Id].iloc[0]
-    except:
-        selected_data = data.iloc[0]
-
-# Information screen
-with cols[1]:
-    # Title
-    st.markdown("## Informatie")
-
-for col in cols[2:]:
-    col.markdown('##')
-    col.markdown('##')
-
-
-with cols[1]:
-    st.write("### Prijs: ")
-    st.write(str(selected_data["rent"]) + " " + str(selected_data["monthly_fee"]))
-
-    st.write("### Adres")
-    st.write(selected_data["postalcode"]  + " " +  selected_data["city"])
-    st.write(selected_data["street"]  + " " +  selected_data["house_number"])
-
-    st.write("### Website")
-    st.write(selected_data["site"]  + ": " +  selected_data["link"])

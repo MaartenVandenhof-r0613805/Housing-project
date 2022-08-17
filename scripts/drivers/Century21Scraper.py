@@ -287,7 +287,7 @@ def standardizeAddress(st):
         postal = int(st[3])
         city = st[4]
     return street,postal,city,house_nr,bus_nr
-
+'''
 
 links = fetchLinks('\chromedriver','3000','FOR_RENT')
 #print(links)
@@ -305,3 +305,4 @@ checkLink(driver,'https://www.century21.be/nl/pand/te-huur/commercieel-pand/leuv
 driver.quit()
 
 
+'''
