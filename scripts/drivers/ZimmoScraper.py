@@ -3,10 +3,14 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
 
+# selenium 4
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 container_root = '//*[@id="wrapper"]/div[3]/div[4]/div[2]/div[2]'
@@ -25,7 +29,6 @@ table_root = '//*[@id="tab-detail"]/div[2]/div/div[4]/div/div' #'//*[@class="blo
 
 
 def fetchLinks(driver,detail,contracttype):
-    driver = setDriver(driver)
     
     URL_base = 'https://www.zimmo.be/nl/'+str(detail)+str(contracttype)
 
@@ -58,7 +61,6 @@ def fetchLinks(driver,detail,contracttype):
 
 
 def checkLink(driver,URL):
-    #driver = setDriver(driver)
     halted = False
     firstPageElement = None
     
@@ -152,11 +154,7 @@ def check4emptypage(driver, container_root):
 
 
 def setDriver(driver):
-    path = 'C:\Program Files\SeleniumDrivers'
-    path = path+str(driver)+'.exe'
-    ser = Service(path)
-    op = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(service=ser, options=op)
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
     return driver
 
 def scrapeHeader(driver,variableDict):

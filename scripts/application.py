@@ -9,7 +9,6 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 import plotly.express
-
 from PIL import Image
 
 #########################
@@ -20,7 +19,6 @@ from PIL import Image
 def get_data():
     df = pd.read_excel("./outputs/Merged_output.xlsx").drop("Unnamed: 0", axis=1).reset_index().rename(columns={"index": "Id"})
     return df
-
 
 #########################
 ####### Dashboard #######
@@ -35,14 +33,14 @@ image = Image.open('assets\CAW.png')
 st.image(image)
 
 
-#########################
-####### Scrapers #######
-#########################
+################################
+####### Scraper settings #######
+################################
 
 st.subheader("Scrape settings")
 
 # Select sites to scrape
-Sites = ['ImmoM', 'Zimmo', 'ImmoProxio', 'Century21']
+Sites = ['Zimmo', 'Century21']
 SiteOptions = st.multiselect(
      'what sites do you want to check?', Sites)
 st.write('You selected:', SiteOptions)
@@ -57,7 +55,10 @@ st.write('You selected:', driverChoice)
 title = st.text_input('On what city do you want to focus?', 'City name')
 st.write('The current chosen city is', title)
 
-# Scrape function
+##############################
+####### Scrape actions #######
+##############################
+
 buttonPress = st.button('Scrape')
 
 status = 'Idle'
@@ -94,14 +95,19 @@ if(buttonPress):
 
             progress = progress + (1/len(links))
             progress_bar.progress(progress)
-
-
+        
+        progress_bar.progress(100)
     status = 'Done'
-    progress_bar.progress(100)
     status_message.markdown('done')
+
+    
 else:
     status = 'Idle'
     status_message.markdown(' ')
+
+################################
+####### Data visualization #####
+################################
 
 if (status == 'Done'):
     data = get_data()
@@ -158,4 +164,3 @@ if (status == 'Done'):
         print()
         cols[i% 4 + 1].write("#### " + col)
         cols[i% 4 + 1].write(selected_data[col].iloc[0])
-
