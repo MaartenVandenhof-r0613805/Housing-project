@@ -30,6 +30,12 @@ def get_data():
 st.set_page_config(layout="wide", page_title="Unassigned Classes")
 st.title("CAW oost brabant scraper")
 
+from PIL import Image
+image = Image.open('assets\CAW.png')
+
+st.image(image)
+
+
 #########################
 ####### Scrapers #######
 #########################
