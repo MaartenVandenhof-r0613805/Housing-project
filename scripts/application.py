@@ -31,7 +31,7 @@ st.set_page_config(layout="wide", page_title="Unassigned Classes")
 data = get_data()
 
 # Set colums
-cols = st.columns(2)
+cols = st.columns([4, 1, 1, 1, 1])
 
 # Selection screen
 with cols[0]:
@@ -51,23 +51,33 @@ with cols[0]:
             gridOptions=gridOptions,
             fit_columns_on_grid_load=True,
             theme="dark",
-            height = "610px",
+            height = "300px",
             update_mode=GridUpdateMode.SELECTION_CHANGED)
         
     # Selected data
     selected_row = selcted_class["selected_rows"]
     selected_row = pd.DataFrame(selected_row)
+    
+    # Show map
+    st.map()
 
     try:
         selected_data = data[data.Id == selected_row.iloc[0].Id]
     except:
         selected_data = data.iloc[:1]
-    st.dataframe(selected_data)
 
 # Information screen
 with cols[1]:
     # Title
-    st.title("Informatie")
-    st.table(selected_data)
+    st.markdown("## Informatie")
 
-    st.map()
+for col in cols[2:]:
+    col.markdown('##')
+    col.markdown('##')
+
+
+for i in range(len(selected_data.columns)):
+    col = selected_data.columns[i]
+    print()
+    cols[i% 4 + 1].write("#### " + col)
+    cols[i% 4 + 1].write(selected_data[col].iloc[0])
