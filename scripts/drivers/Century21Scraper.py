@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
 import pandas as pd
 import time
 
@@ -32,7 +31,6 @@ table_root = '//*[@id="gatsby-focus-wrapper"]/div/div[2]/div[6]/div'
 
 
 def fetchLinks(driver,detail,contracttype):
-    driver = setDriver(driver)
 
     #https://www.century21.be/nl/zoeken?agency=VFqBaHQBXt-nJTnOjKXG&listingType=FOR_RENT&location=3000
     # FOR_RENT  FOR_SALE
@@ -167,13 +165,7 @@ def check4emptypage(driver, container_root):
 
 
 def setDriver(driver):
-    path = 'C:\Program Files\SeleniumDrivers'
-    path = path+str(driver)+'.exe'
-    ser = Service(path)
-    op = webdriver.ChromeOptions()
-    #driver = webdriver.Chrome(service=ser, options=op)
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-
     return driver
 
 def scrapeHeader(driver,variableDict):
@@ -287,7 +279,7 @@ def standardizeAddress(st):
         postal = int(st[3])
         city = st[4]
     return street,postal,city,house_nr,bus_nr
-
+'''
 
 links = fetchLinks('\chromedriver','3000','FOR_RENT')
 #print(links)
@@ -305,3 +297,4 @@ checkLink(driver,'https://www.century21.be/nl/pand/te-huur/commercieel-pand/leuv
 driver.quit()
 
 
+'''
